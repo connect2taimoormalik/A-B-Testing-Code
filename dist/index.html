@@ -1,31 +1,58 @@
 <!DOCTYPE html>
 <html>
-  <head><link rel="stylesheet" href="/index.4d663569.css">
+  <head>
     <title>Parcel Sandbox</title>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
   </head>
 
   <body>
 
     <h1>Check out the Blinkist app</h1>
 
-    <img width="300" src="/hero_image.e578031d.jpg" alt="Check out the Blinkist app">
+    <div id="image_variation" hidden>
+      <img
+        width="300"
+        src="images/hero_image.jpg"
+        alt="Check out the Blinkist app"
+      />
+    </div>
+
+    <div id="video_variation" hidden>
+      <video width="320" height="240" controls>
+        <source src="videos/hero_video.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <div id="quote_variation" hidden>
+      <h2>Quote:</h2>
+      <h3>
+        <i>Darkness cannot drive out darkness: only light can do that.</i>
+      </h3>
+    </div>
+
+    <div id="book_list_variation" hidden>
+      <h2>Book List</h2>
+      <ul>
+        <li>Book 1</li>
+        <li>Book 2</li>
+        <li>Book 3</li>
+        <li>Book 4</li>
+      </ul>
+    </div>
 
     <div>
-      <!-- Control variation -->
       Meet the app that revolutionized reading.
     </div>
 
     <div>
-      <!-- Test variation -->
       Meet the app that has 18 million users.
     </div>
 
     <div>
-      Thanks a lot for reading the article! <a id="sign_up_button" href="/signup">SIGN UP</a> for
+      Thanks a lot for reading the article! <a id="sign_up_button" href="#">SIGN UP</a> for
       Blinkist.
     </div>
 
-    <script src="/index.975ef6c8.js" defer=""></script>
+    <script src="./index.js" type="module"></script>
   </body>
 </html>

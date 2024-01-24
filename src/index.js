@@ -2,63 +2,76 @@ import "./styles.css";
 import $ from "jquery";
 import { trackPageview, trackEvent } from "./analytics-api.js";
 
-$(document).ready(function () {
-  $("body").on("click", "#sign_up_button", function () {
-    // alert("123");
-    let apiKey = "7ca60b0b53921e23c7f09131d2695b52930d5aaf3560ada4bde8dba8";
-    // fetch("https://www.cloudflare.com/cdn-cgi/trace")
-    //   .then((res) => res.text())
-    //   .then((data) => {
-    //     let ipRegex = /[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}/;
-    //     let ip = data.match(ipRegex)[0];
-    //     alert(ip);
-    //   });
-    fetch(`https://api.ipdata.co?api-key=${apiKey}`)
-      .then((res) => res.json())
-      .then((data) => {
-        // alert(data.ip);
-        // alert(data.city);
-        // alert(data.country_code);
-        alert(data.ip);
-      });
-  });
+const apiKeyToTrack =
+  "7ca60b0b53921e23c7f09131d2695b52930d5aaf3560ada4bde8dba8";
+const variationTypes = ["image", "video", "quote", "book_list"];
 
-  function getIpOfUser() {
-    const apiKey = "7ca60b0b53921e23c7f09131d2695b52930d5aaf3560ada4bde8dba8";
-    let ip = "";
+$(document).ready(function () {
+  function getInformationOfCurrentUser() {
+    let result = {};
 
     $.ajax({
       type: "GET",
       async: false,
-      url: `https://api.ipdata.co?api-key=${apiKey}`,
+      url: `https://api.ipdata.co?api-key=${apiKeyToTrack}`,
       dataType: "json",
-      success: function (result) {
-        ip = result.ip;
+      success: function (response) {
+        result = {
+          ip: response.ip,
+          city: response.city,
+          country_code: response.country_code,
+        };
       },
     });
-    return ip;
+    return result;
   }
+
+  function prepareParamsAndTrackPageView() {
+    const userInformation = getInformationOfCurrentUser();
+    const params = {
+      variation_type: localStorage.getItem("variation_type"),
+      ...userInformation,
+    };
+    trackPageview(params);
+    setItemInLocalStorage("current_ip", userInformation.ip);
+    setItemInLocalStorage("current_city", userInformation.city);
+    setItemInLocalStorage("current_country_code", userInformation.country_code);
+  }
+
+  function prepareParamsAndTrackSignUpEvent() {
+    const params = {
+      variation_type: localStorage.getItem("variation_type"),
+      ip: localStorage.getItem("current_ip"),
+      city: localStorage.getItem("current_city"),
+      country_code: localStorage.getItem("current_country_code"),
+    };
+    trackEvent(params);
+  }
+
+  function setItemInLocalStorage(key, value) {
+    localStorage.setItem(key, value);
+  }
+
+  $("body").on("click", "#sign_up_button", function () {
+    alert(localStorage.getItem("user_tracked_on_sign_up"));
+    if (localStorage.getItem("user_tracked_on_sign_up") !== "true") {
+      setItemInLocalStorage("user_tracked_on_sign_up", "true");
+      prepareParamsAndTrackSignUpEvent();
+    }
+  });
 
   function trackUserOnPageLoad() {
-    SetTheCookie("ip", getIpOfUser());
-    // alert(document.cookie);
+    if (localStorage.getItem("user_tracked_on_page_view") === "true") {
+      const selectedVariation = localStorage.getItem("variation_type");
+      $("#" + selectedVariation + "_variation").removeAttr("hidden");
+    } else {
+      const selectedVariation =
+        variationTypes[Math.floor(Math.random() * variationTypes.length)];
+      $("#" + selectedVariation + "_variation").removeAttr("hidden");
+      setItemInLocalStorage("variation_type", selectedVariation);
+      setItemInLocalStorage("user_tracked_on_page_view", "true");
+      prepareParamsAndTrackPageView();
+    }
   }
   trackUserOnPageLoad();
-
-  function SetTheCookie(key, value) {
-    // Expire date for cookie
-    var expires = new Date();
-    // Set expire date for cookie
-    expires.setTime(expires.getTime() + 1 * 24 * 60 * 60 * 1000);
-    // Set cookie key and value which is passed in by parameters
-    document.cookie = key + "=" + value + ";expires=" + expires.toUTCString();
-  }
-
-  function GetTheCookie(key) {
-    // Check to see if there is a cookie matching the value passed in by parameter
-    // var keyValue = document.cookie.match("(^|;) ?" + key + "=([^;]*)(;|$)");
-    // return keyValue ? keyValue[2] : null;
-    return document.cookie;
-  }
-  alert(document.cookie);
 });
